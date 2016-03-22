@@ -1,10 +1,11 @@
 #!/bin/sh
 
-# generate documentation HTMLs
-docco public/scripts/tokenizer.js -o public/docs 
-docco public/scripts/parser.js -o public/docs
-docco public/scripts/codegen.js -o public/docs
-docco public/scripts/webform.js -o public/docs
+# generate documentation HTMLs using the -d flag
+if [[ $1 == "-d" ]]; then
+  for i in `ls public/scripts/*js`; do
+    docco $i -o public/docs 
+  done
+fi
 
 # install required node modules 
 if [ ! -d node_modules ]; then 
