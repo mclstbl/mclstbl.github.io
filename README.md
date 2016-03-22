@@ -10,7 +10,8 @@ npm install
 A build script handles the documentation generation and also starting the server. Run the following from the repo root directory
 ```
 ./build.sh
+```
 
 And visit <http://localhost:3000/>. 
 
-This has only been tested on Mac OSX so far :)
+WARNING: This has only been tested on Mac OSX so :)
