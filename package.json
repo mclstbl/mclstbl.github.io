@@ -1,0 +1,12 @@
+{
+  "name": "MICAELang",
+  "version": "0.0.1",
+  "author": "Micaela Estabillo",
+  "description": "Compiler for emojis",
+  "devDependencies": {
+    "browserify": "latest",
+    "express": "latest",
+    "body-parser": "latest",
+    "jison": "latest"
+  }
+}
