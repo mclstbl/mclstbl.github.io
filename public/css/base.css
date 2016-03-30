@@ -1,62 +1,169 @@
+/*--------------------- Layout ----------------------------*/
+html { height: 100%; }
 body {
-  background: #fff;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 15px;
-  line-height: 1.7;
-  margin: 0;
-  padding: 30px;
+  font-size: 100%;
+  line-height: 18px;
+  color: #30404f;
+  background-color: #F5F5FF;
+  margin: 0; padding: 2% 2% 2% 2%;
+  height:100%;
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 }
+#container { min-height: 100%; }
 
 a {
-  color: #4183c4;
+  color: darkblue;
   text-decoration: none;
 }
 
-a:hover {
-  text-decoration: underline;
+b, strong {
+  font-weight: normal;
 }
 
-code {
-  background-color: #f8f8f8;
-  border: 1px solid #ddd;
-  border-radius: 3px;
-  font-family: "Bitstream Vera Sans Mono", Consolas, Courier, monospace;
-  font-size: 12px;
-  margin: 0 2px;
-  padding: 0 5px;
+p {
+  margin: 15px 15px 15px;
 }
+  .annotation ul, .annotation ol {
+    margin: 25px 0;
+  }
+    .annotation ul li, .annotation ol li {
+      font-size: 14px;
+      line-height: 18px;
+      margin: 10px 0;
+    }
 
-h1, h2, h3, h4 {
-  font-weight: bold;
-  margin: 0 0 15px;
-  padding: 0;
+h1, h2, h3, h4, h5, h6 {
+  color: #112233;
+  line-height: 1em;
+  font-weight: normal;
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  margin: 0px 0 1% 0;
+  text-align: center;
+
 }
 
 h1 {
-  border-bottom: 1px solid #ddd;
-  font-size: 2.5em;
-  font-weight: bold;
-  margin: 0 0 15px;
-  padding: 0;
+  color: brown;
+  margin-top: 1%;
 }
 
 h2 {
-  border-bottom: 1px solid #eee;
-  font-size: 2em;
+  color: darkblue;
+  font-size: 100%;
 }
 
-h3 {
-  font-size: 1.5em;
+hr {
+  border: 0;
+  background: 1px #ddd;
+  height: 1px;
+  margin: 20px 0;
 }
 
-h4 {
-  font-size: 1.2em;
+pre, tt, code {
+  font-size: 12px; line-height: 16px;
+  font-family: Menlo, Monaco, Consolas, "Lucida Console", monospace;
+  margin: 0; padding: 0;
+}
+  .annotation pre {
+    display: block;
+    margin: 0;
+    padding: 7px 10px;
+    background: #fcfcfc;
+    -moz-box-shadow:    inset 0 0 10px rgba(0,0,0,0.1);
+    -webkit-box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    box-shadow:         inset 0 0 10px rgba(0,0,0,0.1);
+    overflow-x: auto;
+  }
+    .annotation pre code {
+      border: 0;
+      padding: 0;
+      background: transparent;
+    }
+
+
+blockquote {
+  border-left: 5px solid #ccc;
+  margin: 0;
+  padding: 1px 0 1px 1em;
+}
+  .sections blockquote p {
+    font-family: Menlo, Consolas, Monaco, monospace;
+    font-size: 12px; line-height: 16px;
+    color: #999;
+    margin: 10px 0 0;
+    white-space: pre-wrap;
+  }
+
+ul.sections {
+  list-style: none;
+  padding:0 0 5px 0;;
+  margin:0;
 }
 
-p, ul {
-  margin: 15px 0;
+#inputArea
+{
+  position: absolute;
+  left: 5%;
+  height: 70%;
+  width: 35%;
+  border: none;
 }
 
-ul {
-  padding-left: 30px;
+#outputArea
+{
+  position: absolute;
+  right: 5%;
+  background: #000000;
+  color: white;
+  font-size: 80%;
+  height: 70%;
+  width: 35%;
+  border: none;
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+#submitButton
+{
+  position: absolute;
+  left: 47.5%;
+}
+
+#links
+{
+  position: relative;
+  top: 80%;
+  text-align: center;
+  font-size: 80%
+}
+
+textarea
+{
+  border: none;
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  font-size: 70%;
+  height: 100%;
+  width: 100%;
+  padding: 3%;
+}
+
+textarea:focus 
+{
+  outline: none;
+
+}
+
+button
+{
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10% 10%;
+    text-align: center;
+    text-decoration: none;
+    font-size: 70%;
+}
+
+button:focus 
+{
+  outline: none;
 }
