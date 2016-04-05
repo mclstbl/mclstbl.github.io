@@ -1,8 +1,29 @@
 #!/bin/sh
 
+# install required node modules 
+if [ ! -d node_modules ]; then 
+  npm install
+fi
+
+i="public/scripts/"
+
+# browserify -r jison -r underscore -o $i"jison.js"
+browserify $i*"compiler.js" -o $i"micaelang.js"
+
+# remove existing final_report.js to avoid overwrite
+if [ -f $i"final_report.js" ]; then
+  rm $i"final_report.js"
+fi
+
+# insert project report components into one file to prepare for docco
+cat $i"00_report1.js" >> $i"final_report.js"
+cat $i"micaelang.js" >> $i"final_report.js"
+cat $i"9_report2.js" >> $i"final_report.js"
+cat $i"bib.js" >> $i"final_report.js" 
+
 # generate documentation HTMLs using the -d flag
 if [[ $1 == "-d" ]]; then
-  for i in `ls public/scripts/*js`; do
+  for i in `ls public/scripts/final_report.js`; do
     cmd="docco $i -o public/docs"
     # change layout of documentation to linear for printing purposes
     if [[ $2 == "-r" ]]; then
@@ -14,15 +35,6 @@ if [[ $1 == "-d" ]]; then
     eval $cmd
   done
 fi
-
-# install required node modules 
-if [ ! -d node_modules ]; then 
-npm install
-fi
-
-i="public/scripts/"
-
-browserify -r jison -o $i"parser.js"
 
 # for demo/testing purposes, start the server to kick off React.js app
 node server.js

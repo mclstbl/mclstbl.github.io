@@ -1,2 +1,0 @@
-// This script defines functions which are called from the webpage, which serves as the front-end interface for the MICAELang application.
-// There are three main components of the interface: textarea, button and output area.
