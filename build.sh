@@ -24,7 +24,7 @@ cat $i"bib.js" >> $i"final_report.js"
 # generate documentation HTMLs using the -d flag
 if [[ $1 == "-d" ]]; then
   for i in `ls public/scripts/final_report.js`; do
-    cmd="docco $i -o public/docs"
+    cmd="docco -c public/docs/public/custom.css -o public/docs $i"
     # change layout of documentation to linear for printing purposes
     if [[ $2 == "-r" ]]; then
       cmd=$cmd" -l linear"
