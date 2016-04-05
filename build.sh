@@ -24,10 +24,12 @@ cat $i"bib.js" >> $i"final_report.js"
 # generate documentation HTMLs using the -d flag
 if [[ $1 == "-d" ]]; then
   for i in `ls public/scripts/final_report.js`; do
-    cmd="docco -c public/docs/public/custom.css -o public/docs $i"
+    cmd="docco -o public/docs $i"
     # change layout of documentation to linear for printing purposes
     if [[ $2 == "-r" ]]; then
-      cmd=$cmd" -l linear"
+      cmd=$cmd" -l linear -c public/css/plain.css"
+    # to use custom CSS, uncomment the next line
+    #  cmd=$cmd" -c public/css/custom.css"
     # otherwise use classic layout for web rendering
     else
       cmd=$cmd" -l classic"
