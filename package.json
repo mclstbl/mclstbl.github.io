@@ -6,6 +6,6 @@
   "devDependencies": {
     "browserify": "latest",
     "express": "latest",
-    "body-parser": "latest",
+    "body-parser": "latest"
   }
 }
