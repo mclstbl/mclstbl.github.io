@@ -35,6 +35,3 @@ if [[ $1 == "-d" ]]; then
     eval $cmd
   done
 fi
-
-# for demo/testing purposes, start the server to kick off React.js app
-node server.js
