@@ -1,4 +1,7 @@
-## To use 
+# MICAELang
+## Multiplatform Illustrated Context-Free ASCII Emoji Language
+
+### To use 
 
 * Clone, unzip then run the following from the root directory:
 ```
