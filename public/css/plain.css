@@ -1,0 +1,10 @@
+html { height: 100%; }
+body {
+  font-size: 80%;
+  line-height: 18px;
+  color: #30404f;
+  background-color: #F5F5FF;
+  margin: 5%; padding: 2% 2% 2% 2%;
+  height:100%;
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
