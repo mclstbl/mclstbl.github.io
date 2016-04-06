@@ -1,4 +1,13 @@
-// ## SYMBOL.JS
+// The '''symbol.js''' module defines a data structure for holding the identifier, type, and value of a variable name in MICAELang. It has three methods
+// * '''lookup''''''
+// * '''update'''
+// * '''insert'''
+// 
+// During the tokenization and parsing of a program, this module maintains a symbols table containing 0 or more instances of '''SYMBOL'''. The three methods
+// are designed such that duplicate symbols are not allowed in the language, and type mismatches cause a compilation error.
+// The symbol table is represented as a hash table for which the key is the identifier and the value is the '''SYMBOL''' object. This facilitates quick updates,
+// insertions and lookups.
+
 var SYMBOL = function(t,i,v)
 {
   this.type = t;
@@ -12,31 +21,53 @@ SYMBOL.prototype = {
 
 exports.SYMBOL = SYMBOL;
 
-// ## Identifier-based Lookup
-// The lookup function for SYMBOLs starts searching from the end of the '''SYMBOL_TABLE'''
-// until the first element.
-exports.lookup = function(identifier,SYMBOL_TABLE)
+// The '''lookup''' function returns the current value of the identifier in the symbol table if it exists, and returns '''null''' otherwise.
+exports.lookup = lookup;
+
+var lookup = function(SYM,TABLE)
 {
+  if (TABLE[SYM.identifier] != null)
+  {
+    return TABLE[SYM.value];    
+  }
   return null;
 }
 
-exports.insert = function(type,identifier,value,SYMBOL_TABLE)
+// The '''update''' function attempts to modify the value of an existing symbol table entry.
+// It returns an array containing the new status of the symbol table, and the '''ERROR''' string, which is empty unless there is a type mismatch.
+var update = function(SYM,TABLE)
 {
-//  var length = Object.keys(SYMBOL_TABLE).length;
-  var sym = new SYMBOL("int", "i", "2");
-  if (lookup(identifier,SYMBOL_TABLE) == -1)
+  if (TABLE[SYM.identifier].type == SYM.type)
   {
-    SYMBOL_TABLE[SYMBOL_TABLE.length + 1] = sym;
+    TABLE[SYM.identifier].value = SYM.value;
+  }
+  else
+  {
+    ERROR = "ERROR: Type mismatch in inserting '" + SYM.identifier + "' into symbol table"
   }
 
-  return SYMBOL_TABLE;
+  return [TABLE,ERROR];
 }
 
+exports.update = update;
 
-// ## symbol.TABLE
-// This data structure keeps track of identifiers, their values, and types.
-// Represented by a 2-dimensional array
-exports.TABLE = function()
+// The '''insert''' function adds a new entry to the symbol table if it does not exist yet; otherwise, it tries to update the symbol associated with the identifier.
+// It returns an array containing the new status of the symbol table and the '''ERROR''' string. Note that if the identifier exists in the symbol table, the error
+// depends on the return value of the '''update''' function.
+var insert = function(SYM,TABLE)
 {
-  SYMBOL_TABLE;
+  if (lookup(SYM,TABLE) == null)
+  {
+    TABLE[SYM.identifier] = SYM;
+    TABLE_AND_ERROR = [TABLE,""];
+  }
+  else
+  {
+    TABLE_AND_ERROR = update(SYM,TABLE);
+  }
+
+  return TABLE_AND_ERROR;
 }
+
+exports.insert = insert;
+//

@@ -1,34 +1,26 @@
-// ## IMPLEMENTATION
+// There are three main components in the web Graphical User Interface (GUI): the editable textarea, clickable "Compile" button, and the read-only output textbox.
+// Together, they simulate an Integrated Development Environment (IDE) where users can edit, run and view their programs.
 
-// There are three main components to the MICAELang web application, which are
-// separated into three scripts. This script (compiler.js) depends on parser.js
-// and codegen.js which are imported via these require statements.
-
-// ## COMPILER.JS
-
-// The green Compile button starts up the compiler so whenever the page loads,
-// an EventListener is present to detect when it is clicked. Upon detection,
-// the compile function is called.
+// The "Compile" button triggers the compilation when it is clicked so whenever the main HTML page loads, an EventListener is created in order to detect 
+// mouseclicks.
 window.onload = function() 
 {
   btn = document.getElementById('submitArea');
   btn.addEventListener('click', compile, false);
+
+  date = new Date(); time = date.toLocaleTimeString();
+  document.getElementById('outputArea').innerHTML += time.concat("    ");
 }
 
-var codegen = require('./5_codegen');
-var parser = require('./3_parser');
-var symbol = require('./4_symbol');
+// 1.  Compilation
+var PARSER = require('./3_parser');
+var TOKENIZER = require('./2_tokenizer');
+var SYMBOL = require('./4_symbol');
+var CODEGEN = require('./5_codegen');
 
-// ### Browser code and Browserify 
-// Since this app only runs on the browser (no server), Browserify has been
-// made part of the build process in order the enable the '''require''' keyword,
-// and to bundle all the scripts into one.
-
-// ## '''compile()'''
-// This function is associated with a button which starts the compilation steps when clicked.
-// Each time the Compile button is clicked, the output from the previous compilation is not cleared. 
-// This is necessary in order to 
-// simulate the environment of a computer terminal or command prompt.
+// The compile function is associated with a button which starts the compilation steps when clicked.
+// Each time the Compile button is clicked, the output from the previous compilation is not cleared
+// in order to simulate the environment of a computer terminal.
 
 exports.compile = compile;
 
@@ -36,25 +28,45 @@ var compile = function()
 {
   node = document.createElement("p");
   obj = document.getElementById("input");
-  code = obj.value.toString();
+  var code = obj.value.toString();
+  exports.CODE = code;
 
-  if (code == '') return true;
+  if (code == '') { console.log("no"); return true;}
   
-// ## Invoking the Parser
-// 
-  parser.parse(code);
+// Invoking the parser 
+// returns list of tokens, symbol table hash, error
+  var PARSED_CODE = PARSER.parse(code);
 
-// 
-  SYMBOL_TABLE = parser.SYMBOL_TABLE;
-  TOKENS = parser.TOKENS;
-  ERROR = parser.ERROR;
-  
-  codegen.generate(parser.TOKENS,parser.SYMBOL_TABLE);
-  JS = codegen.JS;
+  TOKENIZED_CODE = PARSED_CODE.TOKENIZED;
+  SYMBOL_TABLE = PARSED_CODE.SYMBOL_TABLE;
+
+  ERROR = PARSED_CODE.ERROR;
+
+  for(key in SYMBOL_TABLE)
+  {
+    console.log(SYMBOL_TABLE[key].identifier);
+  }
+
+  if (ERROR != "")
+  {
+    stdout(ERROR);
+  }
+  else
+  {
+    JS = CODEGEN.generate(PARSED_CODE);
+    stdout(eval(JS));
+  }
+
+}
 
 // The final output of compiling and running the MICAELang code is 
-// posted on the right hand side of the browser, within a div called "outputArea."  
-  str = (parser.ERROR == "") ? eval(JS) : parser.ERROR;
-  str += "<br>;"
+// posted on the right hand side of the browser, within a div called "outputArea." 
+function stdout(RESULT)
+{
+  str = RESULT; //(ERROR == "") ? eval(JS) : ERROR;
+  date = new Date();
+  time = date.toLocaleTimeString().concat("    "); 
+  str += "<br>".concat(time);
   document.getElementById("outputArea").innerHTML += str;
 }
+//
