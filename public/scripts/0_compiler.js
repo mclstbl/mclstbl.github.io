@@ -8,11 +8,10 @@ window.onload = function()
   btn = document.getElementById('submitArea');
   btn.addEventListener('click', compile, false);
 
-  date = new Date(); time = date.toLocaleTimeString();
-  document.getElementById('outputArea').innerHTML += time.concat("    ");
+  document.getElementById("outputArea").readOnly = true;
 }
 
-// 1.  Compilation
+// ####Compilation####
 var PARSER = require('./3_parser');
 var TOKENIZER = require('./2_tokenizer');
 var SYMBOL = require('./4_symbol');
@@ -65,8 +64,9 @@ function stdout(RESULT)
 {
   str = RESULT; //(ERROR == "") ? eval(JS) : ERROR;
   date = new Date();
-  time = date.toLocaleTimeString().concat("    "); 
-  str += "<br>".concat(time);
-  document.getElementById("outputArea").innerHTML += str;
+  time = date.toLocaleTimeString().concat(" $ "); 
+  str += "\n".concat(time);
+  document.getElementById('outputArea').innerHTML += str;
+  document.getElementById('outputArea').scrollTop = document.getElementById('outputArea').scrollHeight;
 }
 //

@@ -111,6 +111,7 @@ ul.sections {
 
 #outputArea
 {
+  padding: 15px 15px 15px 15px;
   position: absolute;
   right: 5%;
   background: #000000;
