@@ -1,87 +1,86 @@
-// ## GRAMMAR.JS
-exports.GRAMMAR = 
-  [
-// ASSIGNMENT refers to the equal sign.
-  ['IS','\/=\/'],
-// MATH_OPERATORS contains tokens for operations which produce a numerical value.
-  ['PLUS','\/+\/'],
-// The MINUS (-) operator can refer to either subtraction or unary minus.
-// The interpretation of this symbol is determined by its usage.
-  ['MINUS','\/-\/'],
-  ['MULT','\/*\/'],
-  ['DIV','\/\/\/'],
-  ['POW','\/^\/'],
-// BOOLEAN_OPERATORS are operators which produce a Boolean value.
-  ['LT','\/<\/'],
-  ['GT','\/>\/'],
-  ['EQ','\/==\/'],
-  ['OR','\/:*\/'],
-  ['AND','\/<3\/'],
-// The TYPES array holds tokens for the 3 data types supported by MICAELang: Number, String and Boolean.
-  ['NUMBER','\/\\d\/'],
-  ['STRING','\/".*"\/'],
-  ['BOOLEAN','\/^true$|^false$\/'],
-// The COMMENT token is returned when a comment is found.
-  ['COMMENT','\/#\/'],
-// The CLOSURES token contains constructs which are used for scoping.
-  ['LBRACKET','\/[\/'],
-  ['RBRACKET','\/]\/'],
-  ['START','\/:D\/'],
-  ['EOF','\/:(\/'],
-  ['EOL','\/~\/'],
-  ['UNDEFINED','\/.\/']
-  ];
+// #### The MICAELang Grammar
+// Before moving on to the other modules, here is the MICAELang grammar explained. Not all of the productions defined here are compiled correctly as of now, but they are all
+// syntactically parse-able.
 
-exports.TOKENS = 
+// ```LEX``` is a hash table that defines the tokens and regular expression patterns for the grammar's keywords.
+// There are only 3 data types accepted and they are inferred by the parser: Number, String and Boolean. Everything else that is not an operand or keyword is interpreted
+// as an identifier.
+var LEX = [];
+LEX['START'] = 			/\:D/;
+LEX['EOF'] = 				/\:\(/;
+LEX['PROGRAM'] = 		/^[A-Z]+([A-Za-z]*\d*)*/;
+LEX['ELSEIF'] = 		/\:\?\?/;
+LEX['IF'] = 				/\:\?/;
+LEX['ELSE'] = 			/\?/;
+LEX['LBRACKET'] = 	/\\_/;
+LEX['RBRACKET'] =		/_\//;
+LEX['PRINT'] = 			/!{3}/;
+LEX['AND'] = 				/<3/;
+LEX['OR'] = 				/\:\*/;
+LEX['FI'] = 				/\*/;
+LEX['EQ'] = 				/={2}/;
+LEX['IS'] = 				/={1}/;
+LEX['PLUS'] = 			/\+/;
+LEX['MINUS'] = 			/-/;
+LEX['MULT'] = 			/\*/;
+LEX['DIV'] = 				/\//;
+LEX['POW'] = 				/\^/;
+LEX['LT'] = 				/</;
+LEX['GT'] = 				/>/;
+LEX['NUMBER'] = 		/^\d*$/;
+LEX['STRING'] = 		/^".*"$/;
+LEX['BOOLEAN'] = 		/true|false/;
+LEX['COMMENT'] = 		/\#/;
+LEX['EOL'] = 				/\~/;
+LEX['IDENTIFIER'] =	/^[a-z]*([0-9]*[A-Za-z]*)*/;
+LEX['UNDEFINED'] = 	/.*/;
 
- //follow json format key/value pairs: 
-var grammar = {
-   // JavaScript comments also work
-
-   "lex": {
-      "rules": [
-         ["\\s+",                    "/* skip whitespace */"],
-         ["[0-9]+(?:\\.[0-9]+)?\\b", "return 'NUMBER'"],
-         ["\\*",                     "return '*'"],
-         ["\\/",                     "return '/'"],
-         ["-",                       "return '-'"],
-         ["\\+",                     "return '+'"],
-         ["\\^",                     "return '^'"],
-         ["!",                       "return '!'"],
-         ["%",                       "return '%'"],
-         ["\\(",                     "return '('"],
-         ["\\)",                     "return ')'"],
-         ["PI\\b",                   "return 'PI'"],
-         ["E\\b",                    "return 'E'"],
-         ["$",                       "return 'EOF'"]
-      ]
-   },
-
-   "operators": [
-      ["left", "+", "-"],
-      ["left", "*", "/"],
-      ["left", "^"],
-      ["right", "!"],
-      ["right", "%"],
-      ["left", "UMINUS"]
-   ],
-
-   "bnf": {
-      "expressions": [["e EOF",   "return $1"]],
-
-      "e" :[
-         ["e + e",  "$$ = $1+$3"],
-         ["e - e",  "$$ = $1-$3"],
-         ["e * e",  "$$ = $1*$3"],
-         ["e / e",  "$$ = $1/$3"],
-         ["e ^ e",  "$$ = Math.pow($1, $3)"],
-         ["e !",    "$$ = (function(n) {if(n==0) return 1; return arguments.callee(n-1) * n})($1)"],
-         ["e %",    "$$ = $1/100"],
-         ["- e",    "$$ = -$2", {"prec": "UMINUS"}],
-         ["( e )",  "$$ = $2"],
-         ["NUMBER", "$$ = Number(yytext)"],
-         ["E",      "$$ = Math.E"],
-         ["PI",     "$$ = Math.PI"]
-      ]
-   }
+exports.getLEX = function()
+{
+  return LEX;
 }
+
+// The ```RULES``` hash table contains key-value pairs containing the token and a list of acceptable right-hand side tokens.
+// The grammar is left-recursive which means that the operators or functions are on the left-hand side and the operands are on the right. The parser supports
+// unlimited operands, but they have to be of the same type.
+var RULES = [];
+RULES['NUMBER']=    ['NUMBER','EOL'];
+RULES['BOOLEAN']=   ['BOOLEAN','EOL'];
+RULES['STRING']=    ['STRING','EOL'];
+RULES['IDENTIFIER']=['IS','NUMBER','STRING','BOOLEAN','EOL'];
+RULES['PROGRAM']=   ['EOL'];
+RULES['PLUS']=      ['NUMBER','IDENTIFIER'];
+RULES['MINUS']=     ['NUMBER','IDENTIFIER'];
+RULES['MULT']=      ['NUMBER','IDENTIFIER'];
+RULES['DIV']=       ['NUMBER','IDENTIFIER'];
+RULES['POW']=       ['NUMBER','IDENTIFIER'];
+RULES['LT']=        ['NUMBER','IDENTIFIER'];
+RULES['GT']=        ['NUMBER','IDENTIFIER'];
+RULES['IS']=        ['NUMBER','STRING','BOOLEAN','IDENTIFIER','POW','MULT','DIV','PLUS','MINUS','LT','GT','AND','OR','EQ'];
+RULES['EQ']=        ['NUMBER','STRING','BOOLEAN','IDENTIFIER'];
+RULES['AND']=       ['BOOL','IDENTIFIER'];
+RULES['OR']=        ['BOOL','IDENTIFIER']; 
+RULES['PRINT']=     ['STRING','NUMBER','IDENTIFIER'];
+RULES['EOL']=       ['ELSEIF','IF','ELSE','FI','IDENTIFIER','PRINT','COMMENT','EOF'];
+RULES['START']=     ['PROGRAM'];
+RULES['EOF']=       [];
+
+// There are three syntax subdivisions which are also accessable as part of the rules: math operators, bool operators and expressions.
+RULES['OPERATORS'] =    ['POW','MULT','DIV','PLUS','MINUS'];
+RULES['BOOL_OPS'] =     ['LT','GT','AND','OR','EQ'];
+RULES['EXPRESSIONS'] =  ['NUMBER','STRING','BOOLEAN','IDENTIFIER'];
+
+// The following rules for comments, parentheses, and conditionals are not implemented in the parsing yet. 
+// Although their syntax can be verified when used as input, the semantics are not interpretable by the parser as of now.
+RULES['COMMENT']=   ['ELSEIF','IF','ELSE','FI','STRING','COMMENT','EOL'];
+RULES['LBRACKET']=  ['NUMBER','STRING','BOOLEAN','IDENTIFIER','COMMENT'];
+RULES['RBRACKET']=  ['NUMBER','STRING','BOOLEAN','IDENTIFIER','COMMENT','EOL'];
+RULES['IF']=        ['BOOLEAN','IDENTIFIER','LT','GT','EQ','AND','OR','LBRACKET'];
+RULES['ELSEIF']=    ['BOOLEAN','IDENTIFIER','LT','GT','EQ','AND','OR','LBRACKET'];
+RULES['ELSE']=      ['POW','MULT','DIV','PLUS','MINUS','IF','PRINT','COMMENT','FI'];
+RULES['FI']=        ['EOL','COMMENT'];
+
+exports.getRULES = function() {
+  return RULES;
+}
+

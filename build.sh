@@ -31,8 +31,6 @@ if [[ $1 == "-d" ]]; then
     # to use custom CSS, uncomment the next line
     #  cmd=$cmd" -c public/css/custom.css"
     # otherwise use classic layout for web rendering
-    else
-      cmd=$cmd" -l classic"
     fi
     eval $cmd
   done

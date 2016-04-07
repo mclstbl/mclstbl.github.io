@@ -1,8 +1,9 @@
-// There are three main components in the web Graphical User Interface (GUI): the editable textarea, clickable "Compile" button, and the read-only output textbox.
-// Together, they simulate an Integrated Development Environment (IDE) where users can edit, run and view their programs.
+// #### STAGE 1: USER I/O ####
+// There are three components in the web Graphical User Interface (GUI): the editable textarea, clickable "Compile" button, and the read-only output textarea.
+// Together, they emulate an Integrated Development Environment (IDE) where users can edit, run and view their programs.
 
-// The "Compile" button triggers the compilation when it is clicked so whenever the main HTML page loads, an EventListener is created in order to detect 
-// mouseclicks.
+// The button triggers the compilation when it is clicked so whenever the main HTML page loads, an EventListener is created in order to detect mouseclicks.
+// Also, ```textarea``` elements have read/write access by default so I turn on read-only mode for the output box whenever the page is loaded.
 window.onload = function() 
 {
   btn = document.getElementById('submitArea');
@@ -11,62 +12,61 @@ window.onload = function()
   document.getElementById("outputArea").readOnly = true;
 }
 
-// ####Compilation####
-var PARSER = require('./3_parser');
-var TOKENIZER = require('./2_tokenizer');
-var SYMBOL = require('./4_symbol');
-var CODEGEN = require('./5_codegen');
+// This function processes the target code generated using the MICAELang input, and is called after compilation is finished. 
+// The results of a compilation are posted on the right hand side of the browser (in the read-only textarea) as user output.
+var PROGNAME = "";
 
-// The compile function is associated with a button which starts the compilation steps when clicked.
-// Each time the Compile button is clicked, the output from the previous compilation is not cleared
-// in order to simulate the environment of a computer terminal.
-
-exports.compile = compile;
-
-var compile = function() 
-{
-  node = document.createElement("p");
-  obj = document.getElementById("input");
-  var code = obj.value.toString();
-  exports.CODE = code;
-
-  if (code == '') { console.log("no"); return true;}
-  
-// Invoking the parser 
-// returns list of tokens, symbol table hash, error
-  var PARSED_CODE = PARSER.parse(code);
-
-  TOKENIZED_CODE = PARSED_CODE.TOKENIZED;
-  SYMBOL_TABLE = PARSED_CODE.SYMBOL_TABLE;
-
-  ERROR = PARSED_CODE.ERROR;
-
-  for(key in SYMBOL_TABLE)
-  {
-    console.log(SYMBOL_TABLE[key].identifier);
-  }
-
-  if (ERROR != "")
-  {
-    stdout(ERROR);
-  }
-  else
-  {
-    JS = CODEGEN.generate(PARSED_CODE);
-    stdout(eval(JS));
-  }
-
-}
-
-// The final output of compiling and running the MICAELang code is 
-// posted on the right hand side of the browser, within a div called "outputArea." 
 function stdout(RESULT)
 {
-  str = RESULT; //(ERROR == "") ? eval(JS) : ERROR;
+  str = RESULT;
   date = new Date();
   time = date.toLocaleTimeString().concat(" $ "); 
-  str += "\n".concat(time);
-  document.getElementById('outputArea').innerHTML += str;
+  document.getElementById('outputArea').innerHTML += " " + PROGNAME + "\n" + "\n" + time;
   document.getElementById('outputArea').scrollTop = document.getElementById('outputArea').scrollHeight;
 }
-//
+
+// The compilation sequence begins here. The parser, symbol and codegen modules are required from here. While not explicitly imported, the tokenize module
+// is crucial to compilation but is called from the parse module.
+var PARSER = require('./3_parser');
+var SYM = require('./4_symbol');
+var CODEGEN = require('./5_codegen');
+
+exports.compile = function() 
+{
+  obj = document.getElementById("input");
+  var CODE = obj.value.toString().trim();
+  if (CODE == '') { console.log("no"); return true;}
+  
+// The ```ALL``` variable contains information about this system's state after each stage of compilation. It is a record containing the tokens, string inputs, symbol table
+// and error pertaining to the source code. It is passed from module to module so that the state is available at any time. If an error is thrown at any stage, the compilation
+// is aborted and an error is presented to the user.
+  ALL = PARSER.parse(CODE); 
+
+// DELETE
+  for(var key in ALL.ST)
+  {
+    str = "id: " + ALL.ST[key].identifier + " type: " + ALL.ST[key].type + " value: " + ALL.ST[key].value;
+    console.log(str);
+  }
+
+  TMP = {"T":ALL.ST,"E":ALL.E};
+  l = SYM.lookup('PROGNAME',TMP);
+  PROGNAME = l == undefined ? "" : l;
+// DELETE 
+
+
+  if (ALL.E != "")
+  {
+    stdout(ALL.E);
+  }
+
+// The code generator only returns 2 entities in a record: a JavaScript code to be evaluated using built-in JS function ```eval``` and the error string.
+  else
+  {
+    OUTPUT = CODEGEN.generate(ALL);
+    str = OUTPUT.E == "" ? OUTPUT.JS : OUTPUT.E;
+    stdout(eval(str));
+  }
+}
+
+// As mentioned in the _Analysis_, Browserify adds some lines to the output code before each module so here is another one.

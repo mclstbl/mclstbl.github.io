@@ -1,13 +1,16 @@
-// The '''symbol.js''' module defines a data structure for holding the identifier, type, and value of a variable name in MICAELang. It has three methods
-// * '''lookup''''''
-// * '''update'''
-// * '''insert'''
-// 
-// During the tokenization and parsing of a program, this module maintains a symbols table containing 0 or more instances of '''SYMBOL'''. The three methods
-// are designed such that duplicate symbols are not allowed in the language, and type mismatches cause a compilation error.
-// The symbol table is represented as a hash table for which the key is the identifier and the value is the '''SYMBOL''' object. This facilitates quick updates,
-// insertions and lookups.
+// #### The Symbol Table ####
+// The ```symbol.js``` module defines a structure for containing the identifier, type, and value of variables (```IDENTIFIER```) in MICAELang. The actual table
+// is a hash of key-value pairs of identifiers and their associated ```SYMBOL``` objects.
 
+// This module defines three methods
+// * ```lookup```
+// * ```update```
+// * ```insert```
+
+// During the tokenization and parsing of a program, this module maintains a symbols table containing 0 or more instances of ```SYMBOL```. The three methods
+// are designed such that duplicate symbols are not allowed in the language, and type mismatches cause a compilation error.
+
+// The SYMBOL object has three fields: type, identifier and value.
 var SYMBOL = function(t,i,v)
 {
   this.type = t;
@@ -21,53 +24,66 @@ SYMBOL.prototype = {
 
 exports.SYMBOL = SYMBOL;
 
-// The '''lookup''' function returns the current value of the identifier in the symbol table if it exists, and returns '''null''' otherwise.
-exports.lookup = lookup;
-
-var lookup = function(SYM,TABLE)
+// The ```lookup``` function returns the current value of the identifier in the symbol table if it exists, and returns ```undefined``` otherwise.
+var lookup = function(ID,ALL)
 {
-  if (TABLE[SYM.identifier] != null)
+  if (ALL.T = [])
   {
-    return TABLE[SYM.value];    
+    return undefined;
   }
-  return null;
+  else if (ALL.T[ID] != undefined)
+  {
+    return ALL.T[ID].value;    
+  }
+  return undefined;
 }
 
-// The '''update''' function attempts to modify the value of an existing symbol table entry.
-// It returns an array containing the new status of the symbol table, and the '''ERROR''' string, which is empty unless there is a type mismatch.
-var update = function(SYM,TABLE)
+exports.lookup = lookup;
+
+// The ```update``` function attempts to modify the value of an existing symbol table entry.
+// It returns the new status of the symbol table, and the ```ERROR``` string, which is empty unless there is a type mismatch.
+var update = function(SYM,ALL)
 {
-  if (TABLE[SYM.identifier].type == SYM.type)
+  if (ALL.T[SYM.identifier].type == SYM.type)
   {
-    TABLE[SYM.identifier].value = SYM.value;
+    ALL.T[SYM.identifier].value = SYM.value;
+    console.log ("Updated sym table");
   }
   else
   {
-    ERROR = "ERROR: Type mismatch in inserting '" + SYM.identifier + "' into symbol table"
+    ALL.E = "ERROR: Type mismatch in inserting '" + SYM.identifier + "' into symbol table"
   }
-
-  return [TABLE,ERROR];
+  return ALL;
 }
 
 exports.update = update;
 
-// The '''insert''' function adds a new entry to the symbol table if it does not exist yet; otherwise, it tries to update the symbol associated with the identifier.
-// It returns an array containing the new status of the symbol table and the '''ERROR''' string. Note that if the identifier exists in the symbol table, the error
-// depends on the return value of the '''update''' function.
-var insert = function(SYM,TABLE)
+// The ```insert``` function adds a new entry to the symbol table if it does not exist yet; otherwise, it tries to update the symbol associated with the identifier.
+// It returns an array containing the new status of the symbol table and the ```ERROR``` string. Note that if the identifier exists in the symbol table, the error
+// depends on the return value of the ```update``` function.
+var insert = function(SYM,ALL)
 {
-  if (lookup(SYM,TABLE) == null)
+  if (lookup(SYM.identifier,ALL.T) == undefined)
   {
-    TABLE[SYM.identifier] = SYM;
-    TABLE_AND_ERROR = [TABLE,""];
+    ALL.T[SYM.identifier] = SYM;
+    console.log("Inserted into symbol table");
   }
   else
   {
-    TABLE_AND_ERROR = update(SYM,TABLE);
+    console.log("New sym table entry");
+    ALL = update(SYM,TABLE);
   }
-
-  return TABLE_AND_ERROR;
+  return ALL;
 }
 
 exports.insert = insert;
-//
+
+// The following function returns the type of an identifier if it exists in the table, and returns undefined if lookup fails to find the entry.
+exports.getType = function(ID,ALL)
+{
+  if (lookup(ID,ALL) != undefined)
+  {
+    return ALL.T[ID].type;    
+  }
+  return undefined;
+}

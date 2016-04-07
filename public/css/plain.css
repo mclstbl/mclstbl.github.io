@@ -1,10 +1,21 @@
 html { height: 100%; }
 body {
-  font-size: 80%;
-  line-height: 18px;
+  font-size: 12px;
+  line-height: 20px;
   color: #30404f;
   background-color: #F5F5FF;
   margin: 5%; padding: 2% 2% 2% 2%;
   height:100%;
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+pre, tt, code {
+  font-family: Menlo, Consolas, Monaco, monospace;
+  font-size: 19px
+  display: inline-block;
+  border: 1px solid #EAEAEA;
+  background: #f8f8f8;
+  color: #555;
+  padding: 0 5px;
+  line-height: 13px;
 }
