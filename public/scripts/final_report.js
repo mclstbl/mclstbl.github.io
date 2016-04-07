@@ -74,8 +74,8 @@ function stdout(RESULT)
 
 // The compilation sequence begins here. The parser, symbol and codegen modules are required from here. While not explicitly imported, the tokenize module
 // is crucial to compilation but is called from the parse module.
-var PARSER = require('./3_parser');
-var SYM = require('./4_symbol');
+var SYM = require('./2_symbol');
+var PARSER = require('./4_parser');
 var CODEGEN = require('./5_codegen');
 
 exports.compile = function() 
@@ -118,7 +118,7 @@ exports.compile = function()
 
 // As mentioned in the _Analysis_, Browserify adds some lines to the output code before each module so here is another one.
 
-},{"./3_parser":4,"./4_symbol":5,"./5_codegen":6}],2:[function(require,module,exports){
+},{"./2_symbol":3,"./4_parser":5,"./5_codegen":6}],2:[function(require,module,exports){
 // #### The MICAELang Grammar
 // Before moving on to the other modules, here is the MICAELang grammar explained. Not all of the productions defined here are compiled correctly as of now, but they are all
 // syntactically parse-able.
@@ -207,12 +207,102 @@ exports.getRULES = function() {
 
 
 },{}],3:[function(require,module,exports){
+// #### The Symbol Table ####
+// The ```symbol.js``` module defines a structure for containing the identifier, type, and value of variables (```IDENTIFIER```) in MICAELang. The actual table
+// is a hash of key-value pairs of identifiers and their associated ```SYMBOL``` objects.
+
+// This module defines three methods
+// * ```lookup```
+// * ```update```
+// * ```insert```
+
+// During the tokenization and parsing of a program, this module maintains a symbols table containing 0 or more instances of ```SYMBOL```. The three methods
+// are designed such that duplicate symbols are not allowed in the language, and type mismatches cause a compilation error.
+
+// The SYMBOL object has three fields: type, identifier and value.
+var SYMBOL = function(t,i,v)
+{
+  this.type = t;
+  this.identifier = i;
+  this.value = v;
+}
+
+SYMBOL.prototype = {
+  doX : function () {}
+}
+
+exports.SYMBOL = SYMBOL;
+
+// The ```lookup``` function returns the current value of the identifier in the symbol table if it exists, and returns ```undefined``` otherwise.
+var lookup = function(ID,ALL)
+{
+  if (ALL.T = [])
+  {
+    return undefined;
+  }
+  else if (ALL.T[ID] != undefined)
+  {
+    return ALL.T[ID].value;    
+  }
+  return undefined;
+}
+
+exports.lookup = lookup;
+
+// The ```update``` function attempts to modify the value of an existing symbol table entry.
+// It returns the new status of the symbol table, and the ```ERROR``` string, which is empty unless there is a type mismatch.
+var update = function(SYM,ALL)
+{
+  if (ALL.T[SYM.identifier].type == SYM.type)
+  {
+    ALL.T[SYM.identifier].value = SYM.value;
+    console.log ("Updated sym table");
+  }
+  else
+  {
+    ALL.E = "ERROR: Type mismatch in inserting '" + SYM.identifier + "' into symbol table"
+  }
+  return ALL;
+}
+
+exports.update = update;
+
+// The ```insert``` function adds a new entry to the symbol table if it does not exist yet; otherwise, it tries to update the symbol associated with the identifier.
+// It returns an array containing the new status of the symbol table and the ```ERROR``` string. Note that if the identifier exists in the symbol table, the error
+// depends on the return value of the ```update``` function.
+var insert = function(SYM,ALL)
+{
+  if (lookup(SYM.identifier,ALL.T) == undefined)
+  {
+    ALL.T[SYM.identifier] = SYM;
+    console.log("Inserted into symbol table");
+  }
+  else
+  {
+    console.log("New sym table entry");
+    ALL = update(SYM,TABLE);
+  }
+  return ALL;
+}
+
+exports.insert = insert;
+
+// The following function returns the type of an identifier if it exists in the table, and returns undefined if lookup fails to find the entry.
+exports.getType = function(ID,ALL)
+{
+  if (lookup(ID,ALL) != undefined)
+  {
+    return ALL.T[ID].type;    
+  }
+  return undefined;
+}
+},{}],4:[function(require,module,exports){
 // #### STAGE 2: TOKENIZATION ####
 // Tokenization serves as an intermediate step of compilation in order to make parsing simpler. In this process, the raw input code is split into an array. The array contents
 // are assigned tokens according to the grammar rules and this will make it easier for the parser to check patterns later.
 
 var GRAMMAR = require('./1_grammar');
-var SYM = require('./4_symbol');
+var SYM = require('./2_symbol');
 
 // The ```tokenize``` function takes an array of strings as input and returns the state of the system.
 // This function scans every word in the ```CODE``` string and determines the appropriate token to represent it. The meaning behind the program is not meant to be
@@ -263,7 +353,7 @@ exports.tokenize = function(CODE)
 // parse function for further processing.
   return {"T" : TOKENIZED_CODE, "W" : WORDS, "ST" : SYMBOL_TABLE.T, "E" : error};
 }
-},{"./1_grammar":2,"./4_symbol":5}],4:[function(require,module,exports){
+},{"./1_grammar":2,"./2_symbol":3}],5:[function(require,module,exports){
 // #### STAGE 3: PARSING ####
 // After tokenizing, the parser performs a few checks in order to verify that the source code is syntactically correct and is ready for code generation.
 // Since the grammar is left-recursive, the more commonly used recursive descent parsing method is not used here. Moreover, due to JavaScript stack call limits,
@@ -272,9 +362,9 @@ exports.tokenize = function(CODE)
 // * ```simplifyExpressions```
 // * ```simplifyBools```
 
-var TOKENIZER = require('./2_tokenizer');
 var GRAMMAR = require('./1_grammar');
-var SYM = require('./4_symbol');
+var SYM = require('./2_symbol');
+var TOKENIZER = require('./3_tokenizer');
 
 exports.parse = function(CODE) 
 { 
@@ -396,104 +486,11 @@ var typeCheck = function(OPERANDS)
 }
 
 //
-},{"./1_grammar":2,"./2_tokenizer":3,"./4_symbol":5}],5:[function(require,module,exports){
-// #### The Symbol Table ####
-// The ```symbol.js``` module defines a structure for containing the identifier, type, and value of variables (```IDENTIFIER```) in MICAELang. The actual table
-// is a hash of key-value pairs of identifiers and their associated ```SYMBOL``` objects.
-
-// This module defines three methods
-// * ```lookup```
-// * ```update```
-// * ```insert```
-
-// During the tokenization and parsing of a program, this module maintains a symbols table containing 0 or more instances of ```SYMBOL```. The three methods
-// are designed such that duplicate symbols are not allowed in the language, and type mismatches cause a compilation error.
-
-// The SYMBOL object has three fields: type, identifier and value.
-var SYMBOL = function(t,i,v)
-{
-  this.type = t;
-  this.identifier = i;
-  this.value = v;
-}
-
-SYMBOL.prototype = {
-  doX : function () {}
-}
-
-exports.SYMBOL = SYMBOL;
-
-// The ```lookup``` function returns the current value of the identifier in the symbol table if it exists, and returns ```undefined``` otherwise.
-var lookup = function(ID,ALL)
-{
-  if (ALL.T = [])
-  {
-    return undefined;
-  }
-  else if (ALL.T[ID] != undefined)
-  {
-    return ALL.T[ID].value;    
-  }
-  return undefined;
-}
-
-exports.lookup = lookup;
-
-// The ```update``` function attempts to modify the value of an existing symbol table entry.
-// It returns the new status of the symbol table, and the ```ERROR``` string, which is empty unless there is a type mismatch.
-var update = function(SYM,ALL)
-{
-  if (ALL.T[SYM.identifier].type == SYM.type)
-  {
-    ALL.T[SYM.identifier].value = SYM.value;
-    console.log ("Updated sym table");
-  }
-  else
-  {
-    ALL.E = "ERROR: Type mismatch in inserting '" + SYM.identifier + "' into symbol table"
-  }
-  return ALL;
-}
-
-exports.update = update;
-
-// The ```insert``` function adds a new entry to the symbol table if it does not exist yet; otherwise, it tries to update the symbol associated with the identifier.
-// It returns an array containing the new status of the symbol table and the ```ERROR``` string. Note that if the identifier exists in the symbol table, the error
-// depends on the return value of the ```update``` function.
-var insert = function(SYM,ALL)
-{
-  if (lookup(SYM.identifier,ALL.T) == undefined)
-  {
-    ALL.T[SYM.identifier] = SYM;
-    console.log("Inserted into symbol table");
-  }
-  else
-  {
-    console.log("New sym table entry");
-    ALL = update(SYM,TABLE);
-  }
-  return ALL;
-}
-
-exports.insert = insert;
-
-// The following function returns the type of an identifier if it exists in the table, and returns undefined if lookup fails to find the entry.
-exports.getType = function(ID,ALL)
-{
-  if (lookup(ID,ALL) != undefined)
-  {
-    return ALL.T[ID].type;    
-  }
-  return undefined;
-}
-//
-// ###  Code Generation
-//
-},{}],6:[function(require,module,exports){
+},{"./1_grammar":2,"./2_symbol":3,"./3_tokenizer":4}],6:[function(require,module,exports){
 // #### STAGE 4: CODE GENERATION ####
 
-var SYM = require('./4_symbol');
-var TOKENIZER = require('./2_tokenizer');
+var SYM = require('./2_symbol');
+var TOKENIZER = require('./3_tokenizer');
 
 exports.generate = function(ALL) 
 { 
@@ -507,7 +504,7 @@ exports.generate = function(ALL)
   return {"JS":JS, "E":""};
 }
 //
-},{"./2_tokenizer":3,"./4_symbol":5}]},{},[1]);
+},{"./2_symbol":3,"./3_tokenizer":4}]},{},[1]);
 // ### Testing
 // Test plan -- how the program/system was verified. Put the actual test results in the Appendix. This section is useful if your project is more on the software engineering side than research focused.  
 
@@ -564,3 +561,5 @@ exports.generate = function(ALL)
 // Sphere Research Labs. "What is Ideone". https://ideone.com/. March 3, 2016.
 // Emojipedia Pty Ltd. "FAQ". http://emojipedia.org/faq/. March 3, 2016.
 // Graham, Scott. Skulpt. http://www.skulpt.org/
+// Docco. https://jashkenas.github.io/docco/
+// Browserify. browserify.org

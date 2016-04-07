@@ -6,9 +6,9 @@
 // * ```simplifyExpressions```
 // * ```simplifyBools```
 
-var TOKENIZER = require('./2_tokenizer');
 var GRAMMAR = require('./1_grammar');
-var SYM = require('./4_symbol');
+var SYM = require('./2_symbol');
+var TOKENIZER = require('./3_tokenizer');
 
 exports.parse = function(CODE) 
 { 

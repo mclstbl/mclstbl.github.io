@@ -27,8 +27,8 @@ function stdout(RESULT)
 
 // The compilation sequence begins here. The parser, symbol and codegen modules are required from here. While not explicitly imported, the tokenize module
 // is crucial to compilation but is called from the parse module.
-var PARSER = require('./3_parser');
-var SYM = require('./4_symbol');
+var SYM = require('./2_symbol');
+var PARSER = require('./4_parser');
 var CODEGEN = require('./5_codegen');
 
 exports.compile = function() 

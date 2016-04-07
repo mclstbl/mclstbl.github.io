@@ -3,7 +3,7 @@
 // are assigned tokens according to the grammar rules and this will make it easier for the parser to check patterns later.
 
 var GRAMMAR = require('./1_grammar');
-var SYM = require('./4_symbol');
+var SYM = require('./2_symbol');
 
 // The ```tokenize``` function takes an array of strings as input and returns the state of the system.
 // This function scans every word in the ```CODE``` string and determines the appropriate token to represent it. The meaning behind the program is not meant to be

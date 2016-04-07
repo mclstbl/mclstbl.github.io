@@ -142,8 +142,8 @@ The results of a compilation are posted on the right hand side of the browser (i
 is crucial to compilation but is called from the parse module.</p>
 
         
-          <div class='highlight'><pre><span class="hljs-keyword">var</span> PARSER = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./3_parser'</span>);
-<span class="hljs-keyword">var</span> SYM = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./4_symbol'</span>);
+          <div class='highlight'><pre><span class="hljs-keyword">var</span> SYM = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./2_symbol'</span>);
+<span class="hljs-keyword">var</span> PARSER = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./4_parser'</span>);
 <span class="hljs-keyword">var</span> CODEGEN = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./5_codegen'</span>);
 
 exports.compile = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) 
@@ -207,7 +207,7 @@ is aborted and an error is presented to the user.</p>
 
         
           <div class='highlight'><pre>
-},{<span class="hljs-string">"./3_parser"</span>:<span class="hljs-number">4</span>,<span class="hljs-string">"./4_symbol"</span>:<span class="hljs-number">5</span>,<span class="hljs-string">"./5_codegen"</span>:<span class="hljs-number">6</span>}],<span class="hljs-number">2</span>:[<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">require,module,exports</span>)</span>{</pre></div>
+},{<span class="hljs-string">"./2_symbol"</span>:<span class="hljs-number">3</span>,<span class="hljs-string">"./4_parser"</span>:<span class="hljs-number">5</span>,<span class="hljs-string">"./5_codegen"</span>:<span class="hljs-number">6</span>}],<span class="hljs-number">2</span>:[<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">require,module,exports</span>)</span>{</pre></div>
         
       
         
@@ -319,6 +319,128 @@ exports.getRULES = <span class="hljs-function"><span class="hljs-keyword">functi
         
       
         
+        <h4 id="the-symbol-table">The Symbol Table</h4>
+<p>The <code>symbol.js</code> module defines a structure for containing the identifier, type, and value of variables (<code>IDENTIFIER</code>) in MICAELang. The actual table
+is a hash of key-value pairs of identifiers and their associated <code>SYMBOL</code> objects.</p>
+
+        
+      
+        
+        <p>This module defines three methods</p>
+<ul>
+<li><code>lookup</code></li>
+<li><code>update</code></li>
+<li><code>insert</code></li>
+</ul>
+
+        
+      
+        
+        <p>During the tokenization and parsing of a program, this module maintains a symbols table containing 0 or more instances of <code>SYMBOL</code>. The three methods
+are designed such that duplicate symbols are not allowed in the language, and type mismatches cause a compilation error.</p>
+
+        
+      
+        
+        <p>The SYMBOL object has three fields: type, identifier and value.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">var</span> SYMBOL = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">t,i,v</span>)
+</span>{
+  <span class="hljs-keyword">this</span>.type = t;
+  <span class="hljs-keyword">this</span>.identifier = i;
+  <span class="hljs-keyword">this</span>.value = v;
+}
+
+SYMBOL.prototype = {
+  doX : <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{}
+}
+
+exports.SYMBOL = SYMBOL;</pre></div>
+        
+      
+        
+        <p>The <code>lookup</code> function returns the current value of the identifier in the symbol table if it exists, and returns <code>undefined</code> otherwise.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">var</span> lookup = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">ID,ALL</span>)
+</span>{
+  <span class="hljs-keyword">if</span> (ALL.T = [])
+  {
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">undefined</span>;
+  }
+  <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (ALL.T[ID] != <span class="hljs-literal">undefined</span>)
+  {
+    <span class="hljs-keyword">return</span> ALL.T[ID].value;    
+  }
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">undefined</span>;
+}
+
+exports.lookup = lookup;</pre></div>
+        
+      
+        
+        <p>The <code>update</code> function attempts to modify the value of an existing symbol table entry.
+It returns the new status of the symbol table, and the <code>ERROR</code> string, which is empty unless there is a type mismatch.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">var</span> update = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">SYM,ALL</span>)
+</span>{
+  <span class="hljs-keyword">if</span> (ALL.T[SYM.identifier].type == SYM.type)
+  {
+    ALL.T[SYM.identifier].value = SYM.value;
+    <span class="hljs-built_in">console</span>.log (<span class="hljs-string">"Updated sym table"</span>);
+  }
+  <span class="hljs-keyword">else</span>
+  {
+    ALL.E = <span class="hljs-string">"ERROR: Type mismatch in inserting '"</span> + SYM.identifier + <span class="hljs-string">"' into symbol table"</span>
+  }
+  <span class="hljs-keyword">return</span> ALL;
+}
+
+exports.update = update;</pre></div>
+        
+      
+        
+        <p>The <code>insert</code> function adds a new entry to the symbol table if it does not exist yet; otherwise, it tries to update the symbol associated with the identifier.
+It returns an array containing the new status of the symbol table and the <code>ERROR</code> string. Note that if the identifier exists in the symbol table, the error
+depends on the return value of the <code>update</code> function.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">var</span> insert = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">SYM,ALL</span>)
+</span>{
+  <span class="hljs-keyword">if</span> (lookup(SYM.identifier,ALL.T) == <span class="hljs-literal">undefined</span>)
+  {
+    ALL.T[SYM.identifier] = SYM;
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Inserted into symbol table"</span>);
+  }
+  <span class="hljs-keyword">else</span>
+  {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"New sym table entry"</span>);
+    ALL = update(SYM,TABLE);
+  }
+  <span class="hljs-keyword">return</span> ALL;
+}
+
+exports.insert = insert;</pre></div>
+        
+      
+        
+        <p>The following function returns the type of an identifier if it exists in the table, and returns undefined if lookup fails to find the entry.</p>
+
+        
+          <div class='highlight'><pre>exports.getType = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">ID,ALL</span>)
+</span>{
+  <span class="hljs-keyword">if</span> (lookup(ID,ALL) != <span class="hljs-literal">undefined</span>)
+  {
+    <span class="hljs-keyword">return</span> ALL.T[ID].type;    
+  }
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">undefined</span>;
+}
+},{}],<span class="hljs-number">4</span>:[<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">require,module,exports</span>)</span>{</pre></div>
+        
+      
+        
         <h4 id="stage-2-tokenization">STAGE 2: TOKENIZATION</h4>
 <p>Tokenization serves as an intermediate step of compilation in order to make parsing simpler. In this process, the raw input code is split into an array. The array contents
 are assigned tokens according to the grammar rules and this will make it easier for the parser to check patterns later.</p>
@@ -326,7 +448,7 @@ are assigned tokens according to the grammar rules and this will make it easier 
         
           <div class='highlight'><pre>
 <span class="hljs-keyword">var</span> GRAMMAR = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./1_grammar'</span>);
-<span class="hljs-keyword">var</span> SYM = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./4_symbol'</span>);</pre></div>
+<span class="hljs-keyword">var</span> SYM = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./2_symbol'</span>);</pre></div>
         
       
         
@@ -404,7 +526,7 @@ parse function for further processing.</p>
         
           <div class='highlight'><pre>  <span class="hljs-keyword">return</span> {<span class="hljs-string">"T"</span> : TOKENIZED_CODE, <span class="hljs-string">"W"</span> : WORDS, <span class="hljs-string">"ST"</span> : SYMBOL_TABLE.T, <span class="hljs-string">"E"</span> : error};
 }
-},{<span class="hljs-string">"./1_grammar"</span>:<span class="hljs-number">2</span>,<span class="hljs-string">"./4_symbol"</span>:<span class="hljs-number">5</span>}],<span class="hljs-number">4</span>:[<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">require,module,exports</span>)</span>{</pre></div>
+},{<span class="hljs-string">"./1_grammar"</span>:<span class="hljs-number">2</span>,<span class="hljs-string">"./2_symbol"</span>:<span class="hljs-number">3</span>}],<span class="hljs-number">5</span>:[<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">require,module,exports</span>)</span>{</pre></div>
         
       
         
@@ -420,9 +542,9 @@ the initially planned one-pass parsing is not implemented here. Instead, there a
 
         
           <div class='highlight'><pre>
-<span class="hljs-keyword">var</span> TOKENIZER = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./2_tokenizer'</span>);
 <span class="hljs-keyword">var</span> GRAMMAR = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./1_grammar'</span>);
-<span class="hljs-keyword">var</span> SYM = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./4_symbol'</span>);
+<span class="hljs-keyword">var</span> SYM = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./2_symbol'</span>);
+<span class="hljs-keyword">var</span> TOKENIZER = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./3_tokenizer'</span>);
 
 exports.parse = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">CODE</span>) 
 </span>{ 
@@ -574,135 +696,7 @@ Populates and maintains the symbol table</p>
         
         
         
-          <div class='highlight'><pre>},{<span class="hljs-string">"./1_grammar"</span>:<span class="hljs-number">2</span>,<span class="hljs-string">"./2_tokenizer"</span>:<span class="hljs-number">3</span>,<span class="hljs-string">"./4_symbol"</span>:<span class="hljs-number">5</span>}],<span class="hljs-number">5</span>:[<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">require,module,exports</span>)</span>{</pre></div>
-        
-      
-        
-        <h4 id="the-symbol-table">The Symbol Table</h4>
-<p>The <code>symbol.js</code> module defines a structure for containing the identifier, type, and value of variables (<code>IDENTIFIER</code>) in MICAELang. The actual table
-is a hash of key-value pairs of identifiers and their associated <code>SYMBOL</code> objects.</p>
-
-        
-      
-        
-        <p>This module defines three methods</p>
-<ul>
-<li><code>lookup</code></li>
-<li><code>update</code></li>
-<li><code>insert</code></li>
-</ul>
-
-        
-      
-        
-        <p>During the tokenization and parsing of a program, this module maintains a symbols table containing 0 or more instances of <code>SYMBOL</code>. The three methods
-are designed such that duplicate symbols are not allowed in the language, and type mismatches cause a compilation error.</p>
-
-        
-      
-        
-        <p>The SYMBOL object has three fields: type, identifier and value.</p>
-
-        
-          <div class='highlight'><pre><span class="hljs-keyword">var</span> SYMBOL = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">t,i,v</span>)
-</span>{
-  <span class="hljs-keyword">this</span>.type = t;
-  <span class="hljs-keyword">this</span>.identifier = i;
-  <span class="hljs-keyword">this</span>.value = v;
-}
-
-SYMBOL.prototype = {
-  doX : <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{}
-}
-
-exports.SYMBOL = SYMBOL;</pre></div>
-        
-      
-        
-        <p>The <code>lookup</code> function returns the current value of the identifier in the symbol table if it exists, and returns <code>undefined</code> otherwise.</p>
-
-        
-          <div class='highlight'><pre><span class="hljs-keyword">var</span> lookup = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">ID,ALL</span>)
-</span>{
-  <span class="hljs-keyword">if</span> (ALL.T = [])
-  {
-    <span class="hljs-keyword">return</span> <span class="hljs-literal">undefined</span>;
-  }
-  <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (ALL.T[ID] != <span class="hljs-literal">undefined</span>)
-  {
-    <span class="hljs-keyword">return</span> ALL.T[ID].value;    
-  }
-  <span class="hljs-keyword">return</span> <span class="hljs-literal">undefined</span>;
-}
-
-exports.lookup = lookup;</pre></div>
-        
-      
-        
-        <p>The <code>update</code> function attempts to modify the value of an existing symbol table entry.
-It returns the new status of the symbol table, and the <code>ERROR</code> string, which is empty unless there is a type mismatch.</p>
-
-        
-          <div class='highlight'><pre><span class="hljs-keyword">var</span> update = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">SYM,ALL</span>)
-</span>{
-  <span class="hljs-keyword">if</span> (ALL.T[SYM.identifier].type == SYM.type)
-  {
-    ALL.T[SYM.identifier].value = SYM.value;
-    <span class="hljs-built_in">console</span>.log (<span class="hljs-string">"Updated sym table"</span>);
-  }
-  <span class="hljs-keyword">else</span>
-  {
-    ALL.E = <span class="hljs-string">"ERROR: Type mismatch in inserting '"</span> + SYM.identifier + <span class="hljs-string">"' into symbol table"</span>
-  }
-  <span class="hljs-keyword">return</span> ALL;
-}
-
-exports.update = update;</pre></div>
-        
-      
-        
-        <p>The <code>insert</code> function adds a new entry to the symbol table if it does not exist yet; otherwise, it tries to update the symbol associated with the identifier.
-It returns an array containing the new status of the symbol table and the <code>ERROR</code> string. Note that if the identifier exists in the symbol table, the error
-depends on the return value of the <code>update</code> function.</p>
-
-        
-          <div class='highlight'><pre><span class="hljs-keyword">var</span> insert = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">SYM,ALL</span>)
-</span>{
-  <span class="hljs-keyword">if</span> (lookup(SYM.identifier,ALL.T) == <span class="hljs-literal">undefined</span>)
-  {
-    ALL.T[SYM.identifier] = SYM;
-    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Inserted into symbol table"</span>);
-  }
-  <span class="hljs-keyword">else</span>
-  {
-    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"New sym table entry"</span>);
-    ALL = update(SYM,TABLE);
-  }
-  <span class="hljs-keyword">return</span> ALL;
-}
-
-exports.insert = insert;</pre></div>
-        
-      
-        
-        <p>The following function returns the type of an identifier if it exists in the table, and returns undefined if lookup fails to find the entry.</p>
-
-        
-          <div class='highlight'><pre>exports.getType = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">ID,ALL</span>)
-</span>{
-  <span class="hljs-keyword">if</span> (lookup(ID,ALL) != <span class="hljs-literal">undefined</span>)
-  {
-    <span class="hljs-keyword">return</span> ALL.T[ID].type;    
-  }
-  <span class="hljs-keyword">return</span> <span class="hljs-literal">undefined</span>;
-}</pre></div>
-        
-      
-        
-        <h3 id="code-generation">Code Generation</h3>
-
-        
-          <div class='highlight'><pre>},{}],<span class="hljs-number">6</span>:[<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">require,module,exports</span>)</span>{</pre></div>
+          <div class='highlight'><pre>},{<span class="hljs-string">"./1_grammar"</span>:<span class="hljs-number">2</span>,<span class="hljs-string">"./2_symbol"</span>:<span class="hljs-number">3</span>,<span class="hljs-string">"./3_tokenizer"</span>:<span class="hljs-number">4</span>}],<span class="hljs-number">6</span>:[<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">require,module,exports</span>)</span>{</pre></div>
         
       
         
@@ -710,8 +704,8 @@ exports.insert = insert;</pre></div>
 
         
           <div class='highlight'><pre>
-<span class="hljs-keyword">var</span> SYM = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./4_symbol'</span>);
-<span class="hljs-keyword">var</span> TOKENIZER = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./2_tokenizer'</span>);
+<span class="hljs-keyword">var</span> SYM = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./2_symbol'</span>);
+<span class="hljs-keyword">var</span> TOKENIZER = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./3_tokenizer'</span>);
 
 exports.generate = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">ALL</span>) 
 </span>{</pre></div>
@@ -737,7 +731,7 @@ exports.generate = <span class="hljs-function"><span class="hljs-keyword">functi
         
         
         
-          <div class='highlight'><pre>},{<span class="hljs-string">"./2_tokenizer"</span>:<span class="hljs-number">3</span>,<span class="hljs-string">"./4_symbol"</span>:<span class="hljs-number">5</span>}]},{},[<span class="hljs-number">1</span>]);</pre></div>
+          <div class='highlight'><pre>},{<span class="hljs-string">"./2_symbol"</span>:<span class="hljs-number">3</span>,<span class="hljs-string">"./3_tokenizer"</span>:<span class="hljs-number">4</span>}]},{},[<span class="hljs-number">1</span>]);</pre></div>
         
       
         
@@ -832,7 +826,9 @@ manually verify that each one’s corresponding token is correct</p>
         
         <p>Sphere Research Labs. “What is Ideone”. <a href="https://ideone.com/">https://ideone.com/</a>. March 3, 2016.
 Emojipedia Pty Ltd. “FAQ”. <a href="http://emojipedia.org/faq/">http://emojipedia.org/faq/</a>. March 3, 2016.
-Graham, Scott. Skulpt. <a href="http://www.skulpt.org/">http://www.skulpt.org/</a></p>
+Graham, Scott. Skulpt. <a href="http://www.skulpt.org/">http://www.skulpt.org/</a>
+Docco. <a href="https://jashkenas.github.io/docco/">https://jashkenas.github.io/docco/</a>
+Browserify. browserify.org</p>
 
         
       

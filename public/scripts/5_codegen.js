@@ -1,7 +1,7 @@
 // #### STAGE 4: CODE GENERATION ####
 
-var SYM = require('./4_symbol');
-var TOKENIZER = require('./2_tokenizer');
+var SYM = require('./2_symbol');
+var TOKENIZER = require('./3_tokenizer');
 
 exports.generate = function(ALL) 
 { 
