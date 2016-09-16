@@ -1,13 +1,3 @@
-# MICAELang
-## Multiplatform Illustrated Context-Free ASCII Emoji Language
+Visit [mclstbl.github.io][1] to view my project demos!
 
-### To use 
-
-* Clone, unzip then run the following from the root directory:
-```
-./build.sh -d -r
-```
-
-* Visit <http://localhost:3000/> 
-
-WARNING: This has only been tested on Mac OSX so :)
+[1]: http://mclstbl.github.io/
